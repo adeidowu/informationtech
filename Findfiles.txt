@@ -1,0 +1,11 @@
+# Parameters
+$searchPath = "C:\DataFiles"
+$fileTypes = @("*.xml", "*.txt", "*.xlsx")
+
+# Find Files
+$foundFiles = foreach ($type in $fileTypes) {
+    Get-ChildItem -Path $searchPath -Filter $type -Recurse
+}
+
+# Export File Paths to a CSV for SSIS to Consume
+$foundFiles | Select-Object FullName | Export-Csv -Path "C:\DataFiles\FoundFiles.csv" -NoTypeInformation

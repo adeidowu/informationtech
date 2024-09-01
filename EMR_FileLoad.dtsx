@@ -1,0 +1,83 @@
+<?xml version="1.0"?>
+<DTS:Executable xmlns:DTS="www.microsoft.com/SqlServer/Dts" DTS:ExecutableType="SSIS.Package.1" DTS:CreationName="Package">
+  <DTS:Property DTS:Name="PackageFormatVersion">6</DTS:Property>
+  <DTS:Property DTS:Name="Version">1</DTS:Property>
+  <DTS:Property DTS:Name="CreationDate">2024-04-27T12:00:00</DTS:Property>
+  <DTS:Property DTS:Name="Name">FileProcessingPackage</DTS:Property>
+  <DTS:Property DTS:Name="Description">Package to process various file formats and load into SQL Database</DTS:Property>
+  
+  <!-- Variables -->
+  <DTS:Variables>
+    <DTS:Variable DTS:Name="FilePath" DTS:Namespace="User" DTS:DataType="String" DTS:Value="C:\DataFiles\" />
+    <DTS:Variable DTS:Name="SQLConnectionString" DTS:Namespace="User" DTS:DataType="String" DTS:Value="Data Source=ServerName;Initial Catalog=DatabaseName;Integrated Security=SSPI;" />
+  </DTS:Variables>
+
+  <!-- Tasks -->
+  <DTS:Tasks>
+    <!-- Execute PowerShell Script to Find Files -->
+    <DTS:Executable DTS:ExecutableType="SSIS.ExecuteProcessTask.1" DTS:ObjectName="Execute PowerShell">
+      <DTS:Property DTS:Name="DTS:ObjectName">Execute PowerShell</DTS:Property>
+      <DTS:Property DTS:Name="Executable">powershell.exe</DTS:Property>
+      <DTS:Property DTS:Name="Arguments">-File "C:\Scripts\FindFiles.ps1"</DTS:Property>
+    </DTS:Executable>
+    
+    <!-- Data Flow Task -->
+    <DTS:Executable DTS:ExecutableType="SSIS.DataFlowTask.1" DTS:ObjectName="Data Flow Task">
+      <DTS:Property DTS:Name="DTS:ObjectName">Data Flow Task</DTS:Property>
+      
+      <!-- Data Flow Components -->
+      <DTS:Executable DTS:ExecutableType="SSIS.DataFlowTask.1" DTS:ObjectName="Data Flow">
+        <DTS:Tasks>
+          <!-- Source: XML, TXT, Excel -->
+          <DTS:Executable DTS:ExecutableType="SSIS.FlatFileSource.1" DTS:ObjectName="Flat File Source">
+            <DTS:Property DTS:Name="DTS:ObjectName">Flat File Source</DTS:Property>
+            <DTS:ConnectionManagers>
+              <DTS:ConnectionManager DTS:Name="FlatFileConnection" DTS:CreationName="FLATFILE" DTS:ObjectName="FlatFileConnection">
+                <DTS:ObjectData>
+                  <DTS:ConnectionManager>
+                    <DTS:Property DTS:Name="ConnectionString">C:\DataFiles\FoundFiles.csv</DTS:Property>
+                  </DTS:ConnectionManager>
+                </DTS:ObjectData>
+              </DTS:ConnectionManager>
+            </DTS:ConnectionManagers>
+          </DTS:Executable>
+
+          <!-- Derived Column: Patient Biography, Lab Tests, Claims -->
+          <DTS:Component DTS:Name="Derived Column">
+            <DTS:Property DTS:Name="ComponentClassID">{F4CBBF4A-1C2A-4B9F-8E57-1C2A4B9F8E57}</DTS:Property>
+            <DTS:Property DTS:Name="DTS:ObjectName">Derived Column</DTS:Property>
+            <DTS:Inputs>
+              <DTS:Input DTS:Name="Input Path">
+                <DTS:ExternalMetadataColumns>
+                  <!-- Define Input Columns Here -->
+                </DTS:ExternalMetadataColumns>
+                <DTS:OutputColumns>
+                  <DTS:OutputColumn DTS:Name="PatientBiography" DTS:DataType="DT_WSTR" DTS:Length="500" />
+                  <DTS:OutputColumn DTS:Name="LaboratoryTests" DTS:DataType="DT_WSTR" DTS:Length="500" />
+                  <DTS:OutputColumn DTS:Name="ClaimsRecords" DTS:DataType="DT_WSTR" DTS:Length="500" />
+                </DTS:OutputColumns>
+              </DTS:Input>
+            </DTS:Inputs>
+          </DTS:Component>
+
+          <!-- OLE DB Destination -->
+          <DTS:Component DTS:Name="OLE DB Destination">
+            <DTS:Property DTS:Name="ComponentClassID">{E2569AC4-3F46-4C53-8E82-43F8BE13A492}</DTS:Property>
+            <DTS:Property DTS:Name="DTS:ObjectName">OLE DB Destination</DTS:Property>
+            <DTS:ConnectionManagers>
+              <DTS:ConnectionManager DTS:Name="SQLConnection" DTS:CreationName="OLEDB" DTS:ObjectName="User::SQLConnectionString">
+                <DTS:ObjectData>
+                  <DTS:ConnectionManager>
+                    <DTS:Property DTS:Name="ConnectionString">@[User::SQLConnectionString]</DTS:Property>
+                  </DTS:ConnectionManager>
+                </DTS:ObjectData>
+              </DTS:ConnectionManager>
+            </DTS:ConnectionManagers>
+          </DTS:Component>
+
+        </DTS:Tasks>
+      </DTS:Executable>
+    </DTS:Executable>
+  </DTS:Tasks>
+  
+</DTS:Executable>
