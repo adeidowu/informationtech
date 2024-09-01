@@ -29,7 +29,6 @@ BEGIN
             @schedulerID INT,
             @PackageVehicleID INT,
             @schedulerOrderSpotID INT,
-            @packageVehicleID INT,
             @packageVehicleSpotMultiplier INT,
             @packageVehicleStartTime TIME,
             @packageVehicleEndTime TIME,
