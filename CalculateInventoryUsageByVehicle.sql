@@ -16,7 +16,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-ALTER PROC [dbo].[CalculateInventoryUsageByVehicle] 
+CREATE PROC [dbo].[CalculateInventoryUsageByVehicle] 
     @runDate DATE = NULL,
     @daysToCalculate INT = 0,
     @spotsMoved INT
